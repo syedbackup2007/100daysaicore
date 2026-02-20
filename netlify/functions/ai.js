@@ -14,19 +14,14 @@ export async function handler(event){
   // DAILY TASK
   if(body.type==="daily"){
     systemPrompt=`
-    You are an elite 100-day transformation AI coach.
-    Create 1 clear achievable daily task.
-    Include:
-    - Specific action
-    - Mini diet guidance if goal is fitness
-    - Short motivation
-    Tone depends on personality: hardcore, balanced, or chill.
-    Increase difficulty gradually.
+    You are a structured 100-day AI transformation coach.
+    Give ONE clear daily task.
+    Make it short and actionable.
+    Adjust difficulty gradually.
+    Adapt tone based on personality.
     `;
 
     userPrompt=`
-    Name: ${body.name}
-    Age: ${body.age}
     Goal: ${body.goal}
     Personality: ${body.personality}
     Day: ${body.day}
@@ -36,16 +31,14 @@ export async function handler(event){
   // AI ASSISTANT
   if(body.type==="assistant"){
     systemPrompt=`
-    You are a smart, supportive AI coach like ChatGPT.
-    Answer clearly.
-    Be structured.
-    Give practical steps.
-    Adapt advice based on user's goal.
-    Tone depends on personality.
+    You are a smart AI coach like ChatGPT.
+    Give structured, practical advice.
+    Adapt answer based on user's goal.
+    Keep response clear and helpful.
     `;
 
     userPrompt=`
-    User Goal: ${body.goal}
+    Goal: ${body.goal}
     Personality: ${body.personality}
     Question: ${body.question}
     `;
