@@ -11,8 +11,18 @@ export async function handler(event){
   let systemPrompt="";
   let userPrompt="";
 
-  if(body.type==="plan"){
-    systemPrompt="You are an elite 100-day transformation AI. Generate structured daily diet + action plan. Increase difficulty gradually. Personalize tone based on personality.";
+  // DAILY TASK
+  if(body.type==="daily"){
+    systemPrompt=`
+    You are an elite 100-day transformation AI coach.
+    Create 1 clear achievable daily task.
+    Include:
+    - Specific action
+    - Mini diet guidance if goal is fitness
+    - Short motivation
+    Tone depends on personality: hardcore, balanced, or chill.
+    Increase difficulty gradually.
+    `;
 
     userPrompt=`
     Name: ${body.name}
@@ -20,17 +30,25 @@ export async function handler(event){
     Goal: ${body.goal}
     Personality: ${body.personality}
     Day: ${body.day}
-
-    Generate:
-    - Diet plan
-    - Workout or action
-    - Motivation
     `;
   }
 
+  // AI ASSISTANT
   if(body.type==="assistant"){
-    systemPrompt="You are a helpful AI life coach.";
-    userPrompt=body.question;
+    systemPrompt=`
+    You are a smart, supportive AI coach like ChatGPT.
+    Answer clearly.
+    Be structured.
+    Give practical steps.
+    Adapt advice based on user's goal.
+    Tone depends on personality.
+    `;
+
+    userPrompt=`
+    User Goal: ${body.goal}
+    Personality: ${body.personality}
+    Question: ${body.question}
+    `;
   }
 
   const response=await openai.chat.completions.create({
