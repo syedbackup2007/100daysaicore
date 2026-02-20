@@ -1,1 +1,1 @@
-# 100daysaicore
+# 100dayaicore
