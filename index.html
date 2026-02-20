@@ -99,7 +99,14 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
-
+const login = document.getElementById("login");
+const appDiv = document.getElementById("app");
+const day = document.getElementById("day");
+const streak = document.getElementById("streak");
+const progressBar = document.getElementById("progressBar");
+const completeBtn = document.getElementById("completeBtn");
+const task = document.getElementById("task");
+const aiMessage = document.getElementById("aiMessage");
 let user;
 let voiceEnabled=false;
 
@@ -214,4 +221,5 @@ if("serviceWorker" in navigator){
 
 </body>
 </html>
+
 
