@@ -3,78 +3,65 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🔥 100 Day AI</title>
+<title>100 Day AI Coach</title>
 
 <style>
 body{
   margin:0;
   font-family:'Poppins',sans-serif;
-  background:linear-gradient(135deg,#141e30,#243b55);
+  background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);
   color:white;
 }
 
-/* Container */
 .container{
-  max-width:520px;
+  max-width:500px;
   margin:auto;
-  padding:15px;
+  padding:20px;
 }
 
-/* Top Bar */
 .topbar{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  font-size:14px;
-  margin-bottom:10px;
-}
-
-/* Card */
-.card{
   background:rgba(255,255,255,0.08);
-  backdrop-filter:blur(10px);
-  padding:20px;
-  border-radius:20px;
-  margin-top:15px;
+  padding:10px 15px;
+  border-radius:15px;
+  font-weight:bold;
 }
 
-input,select,button{
+.centerInfo{
+  text-align:center;
+  margin-top:10px;
+}
+
+.card{
+  margin-top:20px;
+  padding:20px;
+  background:rgba(255,255,255,0.06);
+  border-radius:20px;
+  backdrop-filter:blur(10px);
+}
+
+button,input,select{
   width:100%;
   padding:12px;
   margin-top:10px;
-  border-radius:12px;
   border:none;
+  border-radius:10px;
   font-size:15px;
 }
 
 button{
-  background:#ff416c;
+  background:#ff2e63;
   color:white;
   font-weight:bold;
-  cursor:pointer;
-}
-
-button:hover{
-  opacity:0.9;
-}
-
-progress{
-  width:100%;
-  height:15px;
-  margin-top:10px;
-}
-
-#welcome{
-  text-align:center;
-  font-size:22px;
-  margin-top:10px;
 }
 
 #aiResponse{
   margin-top:15px;
-  padding:12px;
-  background:rgba(255,255,255,0.05);
-  border-radius:12px;
+  background:rgba(0,0,0,0.3);
+  padding:15px;
+  border-radius:15px;
   font-size:14px;
 }
 </style>
@@ -84,21 +71,21 @@ progress{
 
 <div class="container">
 
-<h2 id="welcome">Welcome</h2>
+<h2 style="text-align:center;">🔥 100 Day AI Coach</h2>
 
 <!-- SETUP -->
 <div id="setup" class="card">
-<input id="name" placeholder="Your Name">
-<input id="age" type="number" placeholder="Your Age">
+<input id="nameInput" placeholder="Your Name">
+<input id="ageInput" type="number" placeholder="Your Age">
 
-<select id="goal">
+<select id="goalInput">
 <option value="weight loss">Weight Loss</option>
 <option value="muscle gain">Muscle Gain</option>
 <option value="healthy lifestyle">Healthy Lifestyle</option>
 <option value="productivity">Productivity</option>
 </select>
 
-<select id="personality">
+<select id="personalityInput">
 <option value="hardcore">Hardcore 🔥</option>
 <option value="balanced">Balanced ⚖️</option>
 <option value="chill">Chill 🌿</option>
@@ -111,33 +98,32 @@ progress{
 <div id="app" style="display:none;">
 
 <div class="topbar">
-<div id="streak">🔥 0</div>
-<div id="xp">XP 0 | Lv 1</div>
+  <div id="streakBox">🔥 0</div>
+  <div id="xpBox">⭐ 0 XP</div>
+</div>
+
+<div class="centerInfo">
+  <div id="welcomeText">Welcome</div>
+  <div id="dayLevelText">Day 1 • Level 1</div>
 </div>
 
 <div class="card">
-<h3 id="day">Day 1 / 100</h3>
+  <h3>🎯 Daily Task</h3>
+  <div id="dailyTask">Loading...</div>
 
-<progress id="progressBar" max="100" value="1"></progress>
+  <button onclick="completeDay()">Complete Day</button>
+  <button onclick="askAI()">Ask AI Coach</button>
 
-<h3 style="margin-top:15px;">🎯 Daily Task</h3>
-<p id="dailyTask">Loading...</p>
-
-<button onclick="completeDay()">Complete Day ✅</button>
-<button onclick="askAI()">Ask AI Coach 🤖</button>
-
-<div id="aiResponse"></div>
-
-</div>
+  <div id="aiResponse"></div>
 </div>
 
+</div>
 </div>
 
 <script>
 
 function getData(){
-  let data=JSON.parse(localStorage.getItem("aiTransform"));
-
+  let data=JSON.parse(localStorage.getItem("coachApp"));
   if(!data){
     data={
       name:"",
@@ -151,30 +137,20 @@ function getData(){
       lastComplete:0
     };
   }
-
   return data;
 }
 
 function saveData(data){
-  localStorage.setItem("aiTransform",JSON.stringify(data));
+  localStorage.setItem("coachApp",JSON.stringify(data));
 }
 
 function startApp(){
-
-  const nameValue=name.value.trim();
-  const ageValue=age.value.trim();
-
-  if(!nameValue || !ageValue){
-    alert("Please enter name and age");
-    return;
-  }
-
   let data=getData();
 
-  data.name=nameValue;
-  data.age=ageValue;
-  data.goal=goal.value;
-  data.personality=personality.value;
+  data.name=nameInput.value || "";
+  data.age=ageInput.value || "";
+  data.goal=goalInput.value || "";
+  data.personality=personalityInput.value || "";
 
   saveData(data);
 
@@ -186,28 +162,21 @@ function startApp(){
 }
 
 function loadApp(){
-
   let data=getData();
 
-  welcome.innerText="Welcome " + data.name;
-
-  day.innerText="Day " + data.day + " / 100";
-  streak.innerText="🔥 " + data.streak;
-  xp.innerText="XP " + data.xp + " | Lv " + data.level;
-
-  progressBar.value=data.day;
+  welcomeText.innerText="Welcome";
+  dayLevelText.innerText=`Day ${data.day} • Level ${data.level}`;
+  streakBox.innerText=`🔥 ${data.streak}`;
+  xpBox.innerText=`⭐ ${data.xp} XP`;
 }
 
 async function generateDailyTask(){
-
   let data=getData();
 
   const res=await fetch("/.netlify/functions/ai",{
     method:"POST",
     body:JSON.stringify({
       type:"daily",
-      name:data.name,
-      age:data.age,
       goal:data.goal,
       personality:data.personality,
       day:data.day
@@ -219,7 +188,6 @@ async function generateDailyTask(){
 }
 
 function completeDay(){
-
   let data=getData();
   const now=Date.now();
   const diff=now-data.lastComplete;
@@ -229,9 +197,7 @@ function completeDay(){
     return;
   }
 
-  if(diff>172800000){
-    data.streak=0;
-  }
+  if(diff>172800000) data.streak=0;
 
   data.day++;
   data.streak++;
@@ -249,14 +215,11 @@ function completeDay(){
 }
 
 async function askAI(){
-
-  let question=prompt("Ask your AI Coach:");
+  let question=prompt("Ask your AI coach:");
 
   if(!question) return;
 
   let data=getData();
-
-  aiResponse.innerText="Thinking...";
 
   const res=await fetch("/.netlify/functions/ai",{
     method:"POST",
@@ -269,12 +232,10 @@ async function askAI(){
   });
 
   const result=await res.json();
-
   aiResponse.innerText=result.reply;
 }
 
-/* AUTO LOAD IF USER EXISTS */
-if(localStorage.getItem("aiTransform")){
+if(localStorage.getItem("coachApp")){
   setup.style.display="none";
   app.style.display="block";
   loadApp();
@@ -282,6 +243,5 @@ if(localStorage.getItem("aiTransform")){
 }
 
 </script>
-
 </body>
 </html>
