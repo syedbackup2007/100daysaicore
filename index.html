@@ -1,204 +1,210 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🔥 100 Day AI Elite</title>
 
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+
 <style>
-body{
+*{
   margin:0;
-  font-family:sans-serif;
-  background:linear-gradient(135deg,#000,#111);
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Outfit',sans-serif;
+}
+
+body{
+  background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);
   color:#fff;
-  text-align:center;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.container{
+  width:95%;
+  max-width:420px;
 }
 
 .card{
-  background:rgba(255,255,255,0.05);
+  background:rgba(255,255,255,0.08);
   backdrop-filter:blur(20px);
-  padding:20px;
-  margin:20px;
-  border-radius:20px;
-  transition:0.3s;
+  border-radius:24px;
+  padding:25px;
+  margin-bottom:20px;
+  box-shadow:0 10px 40px rgba(0,0,0,0.4);
+  transition:0.3s ease;
 }
 
 .card:hover{
-  transform:translateY(-5px);
+  transform:translateY(-6px);
+}
+
+h1{
+  text-align:center;
+  margin-bottom:25px;
+  font-weight:700;
+  font-size:26px;
+}
+
+h2{
+  font-weight:600;
+  margin-bottom:10px;
 }
 
 button{
-  padding:12px 20px;
+  width:100%;
+  padding:14px;
   border:none;
-  border-radius:10px;
-  background:#fff;
-  color:#000;
-  font-weight:bold;
-  margin-top:10px;
+  border-radius:14px;
+  background:linear-gradient(90deg,#ff00cc,#3333ff);
+  color:#fff;
+  font-weight:600;
+  margin-top:15px;
+  cursor:pointer;
+  transition:0.3s ease;
+  font-size:15px;
+}
+
+button:hover{
+  transform:scale(1.05);
+}
+
+.secondary{
+  background:rgba(255,255,255,0.15);
 }
 
 progress{
   width:100%;
   height:10px;
+  border-radius:10px;
+  overflow:hidden;
+}
+
+progress::-webkit-progress-bar{
+  background:#222;
+}
+
+progress::-webkit-progress-value{
+  background:linear-gradient(90deg,#ff00cc,#3333ff);
+}
+
+.small{
+  font-size:14px;
+  opacity:0.8;
+  margin-top:8px;
+}
+
+.ai{
+  margin-top:12px;
+  font-size:14px;
+  opacity:0.9;
+  color:#ffccff;
 }
 </style>
 </head>
+
 <body>
 
-<div id="login">
+<div class="container">
+
 <h1>🔥 100 Day AI Elite</h1>
-<button id="googleLogin">Login with Google</button>
-</div>
-
-<div id="app" style="display:none;">
 
 <div class="card">
-<h2 id="day"></h2>
-<p id="task"></p>
-<button id="completeBtn">Complete</button>
-<p id="aiMessage"></p>
+  <h2 id="day"></h2>
+  <p id="task" class="small">Complete today's mission.</p>
+  <button id="completeBtn">Complete Day</button>
+  <p id="aiMessage" class="ai"></p>
 </div>
 
 <div class="card">
-<h3 id="streak"></h3>
-<progress id="progressBar" max="100" value="0"></progress>
+  <h2 id="streak"></h2>
+  <progress id="progressBar" max="100" value="1"></progress>
 </div>
 
 <div class="card">
-<button onclick="enableVoice()">Enable Voice</button>
-<button onclick="requestNotifications()">Enable Notifications</button>
-<button id="logoutBtn">Logout</button>
+  <button onclick="enableVoice()" class="secondary">Enable Voice</button>
+  <button onclick="requestNotifications()" class="secondary">Enable Notifications</button>
 </div>
 
 </div>
 
-<script type="module">
+<script>
 
-import { initializeApp } from 
-"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-
-import { getAuth, GoogleAuthProvider, signInWithPopup,
-onAuthStateChanged, signOut } 
-from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-import { getFirestore, doc, setDoc, getDoc, updateDoc }
-from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-/* 🔥 REPLACE WITH YOUR FIREBASE CONFIG */
-const firebaseConfig = {
-  apiKey: "AIzaSyASCpcKjnr8owngUqmU42loNd0K0gitylI",
-  authDomain: "100dayaicore.firebaseapp.com",
-  projectId: "100dayaicore",
-  storageBucket:"dayaicore.appspot.com",
-  messagingSender:"731310885591",
-  appId: "1:731310885591:web:679105235ff5d01f2a3e92",
-  measurementId: "G-BP67D6JY9S"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const provider = new GoogleAuthProvider();
-const login = document.getElementById("login");
-const appDiv = document.getElementById("app");
 const day = document.getElementById("day");
 const streak = document.getElementById("streak");
 const progressBar = document.getElementById("progressBar");
 const completeBtn = document.getElementById("completeBtn");
 const task = document.getElementById("task");
 const aiMessage = document.getElementById("aiMessage");
-let user;
-let voiceEnabled=false;
 
-/* LOGIN */
-document.getElementById("googleLogin").onclick =
-()=> signInWithPopup(auth,provider);
+let voiceEnabled = false;
 
-/* LOGOUT */
-document.getElementById("logoutBtn").onclick =
-()=> signOut(auth);
-
-/* AUTH STATE */
-onAuthStateChanged(auth, async(u)=>{
-  if(u){
-    user=u;
-    login.style.display="none";
-    appDiv.style.display="block";
-    loadData();
-  }else{
-    login.style.display="block";
-    appDiv.style.display="none";
+function getData(){
+  let data = JSON.parse(localStorage.getItem("aiElite"));
+  if(!data){
+    data = { currentDay:1, streak:0, lastComplete:0 };
+    localStorage.setItem("aiElite",JSON.stringify(data));
   }
-});
-
-/* LOAD USER DATA */
-async function loadData(){
-  const ref=doc(db,"users",user.uid);
-  const snap=await getDoc(ref);
-
-  if(!snap.exists()){
-    await setDoc(ref,{
-      currentDay:1,
-      streak:0,
-      lastComplete:0
-    });
-  }
-
-  const data=(await getDoc(ref)).data();
-  updateUI(data);
+  return data;
 }
 
-/* UPDATE UI */
+function saveData(data){
+  localStorage.setItem("aiElite",JSON.stringify(data));
+}
+
 function updateUI(data){
   day.innerText="Day "+data.currentDay;
   streak.innerText="🔥 Streak: "+data.streak;
   progressBar.value=data.currentDay;
 }
 
-/* COMPLETE DAY */
-completeBtn.onclick=async()=>{
-  const ref=doc(db,"users",user.uid);
-  const snap=await getDoc(ref);
-  const data=snap.data();
+updateUI(getData());
 
+completeBtn.onclick=()=>{
+  let data=getData();
   const now=Date.now();
   const diff=now-data.lastComplete;
 
   if(diff<86400000){
-    alert("Wait 24 hours.");
+    alert("⏳ Come back tomorrow!");
     return;
   }
 
   let newStreak=data.streak;
+  if(diff>172800000) newStreak=0;
 
-  if(diff>172800000) newStreak=0; // missed day reset
+  data.currentDay+=1;
+  data.streak=newStreak+1;
+  data.lastComplete=now;
 
-  await updateDoc(ref,{
-    currentDay:data.currentDay+1,
-    streak:newStreak+1,
-    lastComplete:now
-  });
-
-  getAIMessage(data.currentDay+1);
-  loadData();
+  saveData(data);
+  updateUI(data);
+  getAIMessage(data.currentDay);
 };
 
-/* AI CALL (NETLIFY FUNCTION) */
 async function getAIMessage(day){
-  const res=await fetch("/.netlify/functions/ai",{
-    method:"POST",
-    body:JSON.stringify({
-      prompt:`Generate task + motivation for day ${day}`
-    })
-  });
+  try{
+    const res=await fetch("/.netlify/functions/ai",{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({
+        prompt:`Generate task + motivation for day ${day}`
+      })
+    });
 
-  const data=await res.json();
-  task.innerText=data.reply;
-  aiMessage.innerText="AI: Stay strong.";
-  if(voiceEnabled) speak(data.reply);
+    const data=await res.json();
+    task.innerText=data.reply;
+    aiMessage.innerText="🔥 AI says: Keep building!";
+    if(voiceEnabled) speak(data.reply);
+  }catch{
+    task.innerText="AI unavailable. Stay consistent.";
+  }
 }
 
-/* VOICE */
 window.enableVoice=()=> voiceEnabled=true;
 
 function speak(text){
@@ -206,13 +212,11 @@ function speak(text){
   speechSynthesis.speak(utter);
 }
 
-/* NOTIFICATIONS */
 window.requestNotifications=async()=>{
   await Notification.requestPermission();
   new Notification("Challenge Activated 🔥");
 };
 
-/* OFFLINE CACHE */
 if("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js");
 }
