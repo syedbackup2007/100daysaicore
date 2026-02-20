@@ -8,13 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
 
 <style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:'Outfit',sans-serif;
-}
-
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Outfit',sans-serif;}
 body{
   background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);
   color:#fff;
@@ -23,38 +17,18 @@ body{
   justify-content:center;
   align-items:center;
 }
-
-.container{
-  width:95%;
-  max-width:420px;
-}
-
+.container{width:95%;max-width:430px;}
 .card{
   background:rgba(255,255,255,0.08);
   backdrop-filter:blur(20px);
   border-radius:24px;
-  padding:25px;
-  margin-bottom:20px;
+  padding:22px;
+  margin-bottom:18px;
   box-shadow:0 10px 40px rgba(0,0,0,0.4);
-  transition:0.3s ease;
+  transition:0.3s;
 }
-
-.card:hover{
-  transform:translateY(-6px);
-}
-
-h1{
-  text-align:center;
-  margin-bottom:25px;
-  font-weight:700;
-  font-size:26px;
-}
-
-h2{
-  font-weight:600;
-  margin-bottom:10px;
-}
-
+.card:hover{transform:translateY(-6px);}
+h1{text-align:center;margin-bottom:20px;font-size:26px;}
 button{
   width:100%;
   padding:14px;
@@ -63,52 +37,20 @@ button{
   background:linear-gradient(90deg,#ff00cc,#3333ff);
   color:#fff;
   font-weight:600;
-  margin-top:15px;
+  margin-top:14px;
   cursor:pointer;
-  transition:0.3s ease;
-  font-size:15px;
+  transition:0.3s;
 }
-
-button:hover{
-  transform:scale(1.05);
-}
-
-.secondary{
-  background:rgba(255,255,255,0.15);
-}
-
-progress{
-  width:100%;
-  height:10px;
-  border-radius:10px;
-  overflow:hidden;
-}
-
-progress::-webkit-progress-bar{
-  background:#222;
-}
-
-progress::-webkit-progress-value{
-  background:linear-gradient(90deg,#ff00cc,#3333ff);
-}
-
-.small{
-  font-size:14px;
-  opacity:0.8;
-  margin-top:8px;
-}
-
-.ai{
-  margin-top:12px;
-  font-size:14px;
-  opacity:0.9;
-  color:#ffccff;
-}
+button:hover{transform:scale(1.05);}
+progress{width:100%;height:10px;margin-top:10px;}
+.small{font-size:14px;opacity:0.9;margin-top:8px;}
+.stat{font-size:14px;margin-top:6px;}
+.level{font-weight:700;color:#ffccff;}
+.xpText{margin-top:6px;font-size:13px;opacity:0.8;}
 </style>
 </head>
 
 <body>
-
 <div class="container">
 
 <h1>🔥 100 Day AI Elite</h1>
@@ -117,60 +59,93 @@ progress::-webkit-progress-value{
   <h2 id="day"></h2>
   <p id="task" class="small">Complete today's mission.</p>
   <button id="completeBtn">Complete Day</button>
-  <p id="aiMessage" class="ai"></p>
+  <p id="motivation" class="small"></p>
 </div>
 
 <div class="card">
-  <h2 id="streak"></h2>
-  <progress id="progressBar" max="100" value="1"></progress>
+  <div class="stat">Level: <span id="level" class="level"></span></div>
+  <div class="xpText">XP: <span id="xp"></span></div>
+  <progress id="xpBar" max="100" value="0"></progress>
 </div>
 
 <div class="card">
-  <button onclick="enableVoice()" class="secondary">Enable Voice</button>
-  <button onclick="requestNotifications()" class="secondary">Enable Notifications</button>
+  <div class="stat">🔥 Streak: <span id="streak"></span></div>
+  <div class="stat">💪 Discipline: <span id="discipline"></span></div>
+  <div class="stat">🎯 Focus: <span id="focus"></span></div>
+  <div class="stat">⚡ Consistency: <span id="consistency"></span></div>
 </div>
 
 </div>
 
 <script>
 
-const day = document.getElementById("day");
-const streak = document.getElementById("streak");
-const progressBar = document.getElementById("progressBar");
-const completeBtn = document.getElementById("completeBtn");
-const task = document.getElementById("task");
-const aiMessage = document.getElementById("aiMessage");
+const dayEl=document.getElementById("day");
+const taskEl=document.getElementById("task");
+const motivationEl=document.getElementById("motivation");
+const completeBtn=document.getElementById("completeBtn");
 
-let voiceEnabled = false;
+const xpEl=document.getElementById("xp");
+const xpBar=document.getElementById("xpBar");
+const levelEl=document.getElementById("level");
+const streakEl=document.getElementById("streak");
 
+const disciplineEl=document.getElementById("discipline");
+const focusEl=document.getElementById("focus");
+const consistencyEl=document.getElementById("consistency");
+
+/* DATA SYSTEM */
 function getData(){
-  let data = JSON.parse(localStorage.getItem("aiElite"));
+  let data=JSON.parse(localStorage.getItem("eliteApp"));
   if(!data){
-    data = { currentDay:1, streak:0, lastComplete:0 };
-    localStorage.setItem("aiElite",JSON.stringify(data));
+    data={
+      currentDay:1,
+      streak:0,
+      lastComplete:0,
+      xp:0,
+      level:1,
+      discipline:0,
+      focus:0,
+      consistency:0
+    };
+    localStorage.setItem("eliteApp",JSON.stringify(data));
   }
   return data;
 }
 
 function saveData(data){
-  localStorage.setItem("aiElite",JSON.stringify(data));
+  localStorage.setItem("eliteApp",JSON.stringify(data));
+}
+
+function getLevelName(level){
+  if(level<3) return "Rookie";
+  if(level<6) return "Builder";
+  if(level<10) return "Beast";
+  return "Elite";
 }
 
 function updateUI(data){
-  day.innerText="Day "+data.currentDay;
-  streak.innerText="🔥 Streak: "+data.streak;
-  progressBar.value=data.currentDay;
+  dayEl.innerText="Day "+data.currentDay;
+  streakEl.innerText=data.streak;
+
+  xpEl.innerText=data.xp;
+  xpBar.value=data.xp % 100;
+  levelEl.innerText=getLevelName(data.level)+" (Lv."+data.level+")";
+
+  disciplineEl.innerText=data.discipline;
+  focusEl.innerText=data.focus;
+  consistencyEl.innerText=data.consistency;
 }
 
 updateUI(getData());
 
-completeBtn.onclick=()=>{
+/* COMPLETE DAY */
+completeBtn.onclick=async()=>{
   let data=getData();
   const now=Date.now();
   const diff=now-data.lastComplete;
 
   if(diff<86400000){
-    alert("⏳ Come back tomorrow!");
+    alert("⏳ Come back tomorrow.");
     return;
   }
 
@@ -181,42 +156,44 @@ completeBtn.onclick=()=>{
   data.streak=newStreak+1;
   data.lastComplete=now;
 
+  const gainedXP=25+Math.floor(Math.random()*15);
+  data.xp+=gainedXP;
+
+  if(data.xp>=data.level*100){
+    data.level+=1;
+  }
+
+  data.discipline+=2;
+  data.focus+=2;
+  data.consistency+=3;
+
   saveData(data);
   updateUI(data);
-  getAIMessage(data.currentDay);
+
+  getAIMessage(data.currentDay,data.streak);
 };
 
-async function getAIMessage(day){
+/* AI */
+async function getAIMessage(day,streak){
   try{
     const res=await fetch("/.netlify/functions/ai",{
       method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({
-        prompt:`Generate task + motivation for day ${day}`
-      })
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({day,streak})
     });
 
     const data=await res.json();
-    task.innerText=data.reply;
-    aiMessage.innerText="🔥 AI says: Keep building!";
-    if(voiceEnabled) speak(data.reply);
+
+    taskEl.innerText=data.task;
+    motivationEl.innerText="🔥 "+data.motivation;
+
   }catch{
-    task.innerText="AI unavailable. Stay consistent.";
+    taskEl.innerText="Do 30 minutes of deep focused work.";
+    motivationEl.innerText="Consistency builds empires.";
   }
 }
 
-window.enableVoice=()=> voiceEnabled=true;
-
-function speak(text){
-  const utter=new SpeechSynthesisUtterance(text);
-  speechSynthesis.speak(utter);
-}
-
-window.requestNotifications=async()=>{
-  await Notification.requestPermission();
-  new Notification("Challenge Activated 🔥");
-};
-
+/* SERVICE WORKER */
 if("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js");
 }
