@@ -1,50 +1,50 @@
 import OpenAI from "openai";
 
 export async function handler(event){
-  try{
-    const openai=new OpenAI({
-      apiKey:process.env.OPENAI_API_KEY
-    });
 
-    const body=JSON.parse(event.body);
+  const openai=new OpenAI({
+    apiKey:process.env.OPENAI_API_KEY
+  });
 
-    const response=await openai.chat.completions.create({
-      model:"gpt-4o-mini",
-      temperature:0.9,
-      messages:[
-        {
-          role:"system",
-          content:`
-Return ONLY valid JSON:
+  const body=JSON.parse(event.body);
 
-{
- "task":"Specific action task",
- "motivation":"Short powerful line"
-}
+  let systemPrompt="";
+  let userPrompt="";
 
-Increase difficulty gradually.
-Make it intense and practical.
-`
-        },
-        {
-          role:"user",
-          content:`Day ${body.day}, Streak ${body.streak}`
-        }
-      ]
-    });
+  if(body.type==="plan"){
+    systemPrompt="You are an elite 100-day transformation AI. Generate structured daily diet + action plan. Increase difficulty gradually. Personalize tone based on personality.";
 
-    return{
-      statusCode:200,
-      body:response.choices[0].message.content
-    };
+    userPrompt=`
+    Name: ${body.name}
+    Age: ${body.age}
+    Goal: ${body.goal}
+    Personality: ${body.personality}
+    Day: ${body.day}
 
-  }catch{
-    return{
-      statusCode:500,
-      body:JSON.stringify({
-        task:"Do 30 minutes of focused work.",
-        motivation:"Consistency builds empires."
-      })
-    };
+    Generate:
+    - Diet plan
+    - Workout or action
+    - Motivation
+    `;
   }
+
+  if(body.type==="assistant"){
+    systemPrompt="You are a helpful AI life coach.";
+    userPrompt=body.question;
+  }
+
+  const response=await openai.chat.completions.create({
+    model:"gpt-4o-mini",
+    messages:[
+      {role:"system",content:systemPrompt},
+      {role:"user",content:userPrompt}
+    ]
+  });
+
+  return{
+    statusCode:200,
+    body:JSON.stringify({
+      reply:response.choices[0].message.content
+    })
+  };
 }
