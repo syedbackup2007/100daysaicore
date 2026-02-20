@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔥 100 Day AI Elite</title>
+
+<style>
+body{
+  margin:0;
+  font-family:sans-serif;
+  background:linear-gradient(135deg,#000,#111);
+  color:#fff;
+  text-align:center;
+}
+
+.card{
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(20px);
+  padding:20px;
+  margin:20px;
+  border-radius:20px;
+  transition:0.3s;
+}
+
+.card:hover{
+  transform:translateY(-5px);
+}
+
+button{
+  padding:12px 20px;
+  border:none;
+  border-radius:10px;
+  background:#fff;
+  color:#000;
+  font-weight:bold;
+  margin-top:10px;
+}
+
+progress{
+  width:100%;
+  height:10px;
+}
+</style>
+</head>
+<body>
+
+<div id="login">
+<h1>🔥 100 Day AI Elite</h1>
+<button id="googleLogin">Login with Google</button>
+</div>
+
+<div id="app" style="display:none;">
+
+<div class="card">
+<h2 id="day"></h2>
+<p id="task"></p>
+<button id="completeBtn">Complete</button>
+<p id="aiMessage"></p>
+</div>
+
+<div class="card">
+<h3 id="streak"></h3>
+<progress id="progressBar" max="100" value="0"></progress>
+</div>
+
+<div class="card">
+<button onclick="enableVoice()">Enable Voice</button>
+<button onclick="requestNotifications()">Enable Notifications</button>
+<button id="logoutBtn">Logout</button>
+</div>
+
+</div>
+
+<script type="module">
+
+import { initializeApp } from 
+"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+
+import { getAuth, GoogleAuthProvider, signInWithPopup,
+onAuthStateChanged, signOut } 
+from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+import { getFirestore, doc, setDoc, getDoc, updateDoc }
+from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+/* 🔥 REPLACE WITH YOUR FIREBASE CONFIG */
+const firebaseConfig = {
+  apiKey: "YOUR_KEY",
+  authDomain: "YOUR_DOMAIN",
+  projectId: "YOUR_PROJECT_ID",
+  appId: "YOUR_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const provider = new GoogleAuthProvider();
+
+let user;
+let voiceEnabled=false;
+
+/* LOGIN */
+document.getElementById("googleLogin").onclick =
+()=> signInWithPopup(auth,provider);
+
+/* LOGOUT */
+document.getElementById("logoutBtn").onclick =
+()=> signOut(auth);
+
+/* AUTH STATE */
+onAuthStateChanged(auth, async(u)=>{
+  if(u){
+    user=u;
+    login.style.display="none";
+    appDiv.style.display="block";
+    loadData();
+  }else{
+    login.style.display="block";
+    appDiv.style.display="none";
+  }
+});
+
+/* LOAD USER DATA */
+async function loadData(){
+  const ref=doc(db,"users",user.uid);
+  const snap=await getDoc(ref);
+
+  if(!snap.exists()){
+    await setDoc(ref,{
+      currentDay:1,
+      streak:0,
+      lastComplete:0
+    });
+  }
+
+  const data=(await getDoc(ref)).data();
+  updateUI(data);
+}
+
+/* UPDATE UI */
+function updateUI(data){
+  day.innerText="Day "+data.currentDay;
+  streak.innerText="🔥 Streak: "+data.streak;
+  progressBar.value=data.currentDay;
+}
+
+/* COMPLETE DAY */
+completeBtn.onclick=async()=>{
+  const ref=doc(db,"users",user.uid);
+  const snap=await getDoc(ref);
+  const data=snap.data();
+
+  const now=Date.now();
+  const diff=now-data.lastComplete;
+
+  if(diff<86400000){
+    alert("Wait 24 hours.");
+    return;
+  }
+
+  let newStreak=data.streak;
+
+  if(diff>172800000) newStreak=0; // missed day reset
+
+  await updateDoc(ref,{
+    currentDay:data.currentDay+1,
+    streak:newStreak+1,
+    lastComplete:now
+  });
+
+  getAIMessage(data.currentDay+1);
+  loadData();
+};
+
+/* AI CALL (NETLIFY FUNCTION) */
+async function getAIMessage(day){
+  const res=await fetch("/.netlify/functions/ai",{
+    method:"POST",
+    body:JSON.stringify({
+      prompt:`Generate task + motivation for day ${day}`
+    })
+  });
+
+  const data=await res.json();
+  task.innerText=data.reply;
+  aiMessage.innerText="AI: Stay strong.";
+  if(voiceEnabled) speak(data.reply);
+}
+
+/* VOICE */
+window.enableVoice=()=> voiceEnabled=true;
+
+function speak(text){
+  const utter=new SpeechSynthesisUtterance(text);
+  speechSynthesis.speak(utter);
+}
+
+/* NOTIFICATIONS */
+window.requestNotifications=async()=>{
+  await Notification.requestPermission();
+  new Notification("Challenge Activated 🔥");
+};
+
+/* OFFLINE CACHE */
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("sw.js");
+}
+
+</script>
+
+</body>
+</html>
